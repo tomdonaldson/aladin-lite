@@ -14,7 +14,7 @@ import glsl from 'vite-plugin-glsl';
 
 export default defineConfig({
     build: {
-        minify: 'esbuild',
+        minify: false,
         lib: {
             // Could also be a dictionary or array of multiple entry points
             entry: resolve(__dirname, 'src/js/A.js'),
