@@ -877,6 +877,40 @@ export let Catalog = (function () {
     }
 
     /**
+     * Select sources of the catalog corresponding to the true values in the given mask.
+     *
+     * @memberof Catalog
+     *
+     * @param {Array} mask - Array of booleans indicating which sources to select.
+     */
+    Catalog.prototype.selectByMask = function(mask) {
+        // Ignore the mask if its size doesn't match the source list.
+        const maskLen = Array.isArray(mask) ? mask.length : NaN;
+        const sources = this.sources;
+        if (maskLen != sources.length) {
+            console.warn("Catalog.selectByMask(): mask length (" + maskLen +
+                ") must match number of sources (" + this.sources.length + ").  Mask ignored.");
+            return;
+        }
+        let selection = [];
+        for (let i=0; i<maskLen; i++) {
+            if (mask[i]) {
+                selection.push(sources[i]);
+            }
+        }
+
+        if (this.view) {
+            this.view.selectObjects([selection]);
+            if (this.view.aladin.callbacksByEventName) {
+                var callback = this.view.aladin.callbacksByEventName['objectsSelected'] || this.view.aladin.callbacksByEventName['select'];
+                if (callback) {
+                    callback([selection]);
+                }
+            }
+        }
+    }
+
+    /**
      * Set the color of hovered sources
      *
      * @memberof Catalog
