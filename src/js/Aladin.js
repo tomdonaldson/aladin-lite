@@ -2633,9 +2633,9 @@ export let Aladin = (function () {
             return "Fish eye projection is not supported by WCS standards.";
 
         // reversed longitude case
-        if (this.getBaseImageLayer().longitudeReversed) {
-            cdelt1 = -cdelt1;
-        }
+        // if (this.getBaseImageLayer().longitudeReversed) {
+        //     cdelt1 = -cdelt1;
+        // }
 
         // solar system object dict from planetary fits standard
         // https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2018EA000388
@@ -2660,7 +2660,8 @@ export let Aladin = (function () {
         // just in case it would be equatorial
         let radesys;
 
-        if (this.getBaseImageLayer().isPlanetaryBody()) {
+        // if (this.getBaseImageLayer().isPlanetaryBody()) {
+        if (false) {
             const body = this.getBaseImageLayer().hipsBody;
             if (body in solarSystemObjects) {
                 cooType1 = `${solarSystemObjects[body]}LN-`;
