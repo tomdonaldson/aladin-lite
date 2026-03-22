@@ -306,6 +306,7 @@ export let View = (function () {
     View.SELECT = 1;
     View.TOOL_SIMBAD_POINTER = 2;
     View.TOOL_COLOR_PICKER = 3;
+    View.TOOL_SKEWER_SELECTOR = 4;
 
     // TODO: should be put as an option at layer level
     View.DRAW_SOURCES_WHILE_DRAGGING = true;
@@ -489,6 +490,8 @@ export let View = (function () {
             this.colorPickerTool.domElement.style.display = "block";
             this.setCursor('crosshair');
             this.aladin.showReticle(false)
+        } else if (this.mode == View.TOOL_SKEWER_SELECTOR) {
+            // Placeholder for special skewer handling such as a new cursor.
         }
 
         ALEvent.MODE.dispatchedTo(this.aladin.aladinDiv, {mode});
@@ -670,11 +673,9 @@ export let View = (function () {
         var showContextMenu = true;
         var xystart;
 
-        var handleSelect = function(xy, tolerance) {
+        var handleSelect = function(xy, tolerance, modified=false) {
             tolerance = tolerance || 5;
             var objs = view.closestObjects(xy.x, xy.y, tolerance);
-
-            view.unselectObjects();
 
             if (objs) {
                 var objClickedFunction = view.aladin.callbacksByEventName['objectClicked'];
@@ -714,11 +715,14 @@ export let View = (function () {
                 if (shapes.length > 0) {
                     objs.push(shapes)
                 }
-                view.selectObjects(objs);
+                view.selectObjects(objs, modified);
 
                 view.lastClickedObject = objs;
 
             } else {
+
+                view.unselectObjects();
+
                 // If there is a past clicked object
                 if (view.lastClickedObject) {
                     // TODO: do we need to keep that triggering ?
@@ -848,6 +852,14 @@ export let View = (function () {
                     })
                 return; // listeners are not called
             }
+
+            if (view.mode == View.TOOL_SKEWER_SELECTOR) {
+                // Perform a skewer selection
+                let objList = Selector.getSkewerObjects(e, view);
+                view.selectObjects(objList);
+
+                return; // when in TOOL_SKEWER_SELECTOR mode, we do not call the listeners
+            }
         });
 
         Utils.on(document, "mouseup touchend", function(e) {
@@ -875,6 +887,7 @@ export let View = (function () {
         // reacting on 'click' rather on 'mouseup' is more reliable when panning the view
         Utils.on(view.catalogCanvas, "mouseup mouseout touchend touchcancel", function (e) {
             const xymouse = Utils.relMouseCoords(e);
+            const modified = e.ctrlKey || e.metaKey;
 
             ALEvent.CANVAS_EVENT.dispatchedTo(view.aladinDiv, {
                 state: {
@@ -955,7 +968,7 @@ export let View = (function () {
             }
 
             // popup to show ?
-            if (!wasDragging || e.type === "touchend") {
+            if ((!wasDragging || e.type === "touchend") && view.mode !== View.TOOL_SKEWER_SELECTOR) {
                 if (e.type === "touchend") {
                     if (e.targetTouches && e.targetTouches.length == 0) {
                         // Check if the user moved a lot or not
@@ -963,11 +976,11 @@ export let View = (function () {
                         const elapsedTime = Date.now() - touchStartTime;
                         if (elapsedTime < 100) {
                             view.updateObjectsLookup();
-                            handleSelect(xymouse, 15);
+                            handleSelect(xymouse, 15, modified);
                         }
                     }
                 } else {
-                    handleSelect(xymouse);
+                    handleSelect(xymouse, 5, modified);
                 }
             }
 
@@ -1348,6 +1361,7 @@ export let View = (function () {
 
         view.displayHpxGrid = false;
         view.displayCatalog = false;
+        view.skewerEnabled = false;
     };
 
     View.prototype.requestRedrawAtDate = function (date) {
@@ -1611,9 +1625,13 @@ export let View = (function () {
         this.requestRedraw();
     }
 
-    View.prototype.selectObjects = function(selection) {
+    View.prototype.selectObjects = function(selection, modified=false) {
         if (this.manualSelection) {
             return;
+        }
+
+        if (Array.isArray(selection) && modified) {
+            selection = this.computeModifiedSelection(selection, selection)
         }
 
         // unselect the previous selection
@@ -1693,6 +1711,104 @@ export let View = (function () {
         }
     }
 
+    View.prototype._getLayerForObj = function(obj) {
+        let layer = null;
+        if (obj.getCatalog) {
+            layer = obj.getCatalog()
+        } else {
+            layer = obj.overlay
+        }
+        return layer
+    }
+
+    View.prototype._copySelectionsToStage = function(selections, stage, overlays, exclude) {
+        for (const group of selections) {
+            for (const obj of group) {
+                const objExcluded = exclude.includes(obj)
+                if (!objExcluded) {
+                    const layer = this._getLayerForObj(obj)
+                    const idx = overlays.findIndex(item => item.uuid === layer.uuid);
+                    // const idx = overlays.indexOf(layer)
+                    if (idx >= 0) {
+                        stage[idx].push(obj)
+                    } else {
+                        console.warn("Layer not found for selected obj: " + obj)
+                    }
+                }
+            }
+        }
+    }
+
+    View.prototype.computeModifiedSelection = function(pending) {
+        const current = this.selection
+        let modSelection = pending
+        if (current && current.length > 0) {
+            // There are some items already selected.
+            // We will be adding all the pending selections that are not already selected,
+            // UNLESS all of the pending selections are already selected, in which case
+            // they will all be unselected.
+            const toAdd = []
+            let mightRemove = []
+            modSelection = []  // We will build a new selection list from the current and pending selections
+
+            // stage will have one row for each existing overlay in which to collect all desired selections.
+            const overlays = this.aladin.getOverlays()
+            const stage = new Array(overlays.length).fill(null).map(() => []);
+
+            // Put already-selected items in mightRemove and not-yet-selected items in toAdd.
+            for (const group of pending) {
+                for (const obj of group) {
+                    if (obj.isSelected) {
+                        mightRemove.push(obj)
+                    } else {
+                        toAdd.push(obj)
+                    }
+                }
+            }
+
+            // If there is anything in toAdd, then clear mightRemove since they will be left selected.
+            if (toAdd.length > 0) {
+                mightRemove = []
+            }
+
+            // Copy current selections to stage except for anything in mightRemove
+            this._copySelectionsToStage(current, stage, overlays, mightRemove)
+
+            // Copy toAdd selections to stage
+            this._copySelectionsToStage([toAdd], stage, overlays, [])
+
+            // Build new modified selections list from stage.
+            // I can preserve the layer order, but I don't know how to preserve the order within
+            // layers without looping through all objects, and that seems crazy.
+            // Hopefully that order doesn't matter.  We'll see if it affects the table display.
+            for (let i=0; i<stage.length; i++) {
+                if (stage[i].length > 0) {
+                    // We have selected objects in this layer so will add the layer (or list of overlays) to modSelection
+
+                    if (overlays[i].type === 'catalog') {
+                        // The layer is a catalog so we add one entry for all its selections
+                        const catLayer = []
+                        modSelection.push(catLayer)
+                        for (const obj of stage[i]) {
+                            catLayer.push(obj)
+                        }
+
+                    } else {
+                        // Assume it's a graphicalOverlay and add separate entries for each selected obj
+                        // (That is the way objects in graphicalOverlays are currently selected.  If they start
+                        // being selected all in one list per overlay, then that can change here.)
+                        for (const obj of stage[i]) {
+                            modSelection.push([obj])
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return modSelection;
+    }
+
     View.prototype.getVisibleCells = function (norder) {
         return this.wasm.getVisibleCells(norder);
     };
@@ -1754,6 +1870,22 @@ export let View = (function () {
 
     View.prototype.getGridOptions = function() {
         return this.gridCfg;
+    };
+
+    View.prototype.setSkewerEnabled = function (enabled) {
+        const wasEnabled = this.skewerEnabled;
+        this.skewerEnabled = enabled;
+
+        if (enabled && !wasEnabled) {
+            const selectObjects = (selection) => {
+                this.selectObjects(selection);
+            };
+            this.aladin.select('skewer', selectObjects);
+        }
+    };
+
+    View.prototype.getSkewerEnabled = function () {
+        return this.skewerEnabled;
     };
 
     View.prototype.updateZoomState = function () {

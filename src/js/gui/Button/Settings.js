@@ -32,6 +32,7 @@ import { CtxMenuActionButtonOpener } from "./CtxMenuOpener";
 import settingsIconUrl from './../../../../assets/icons/settings.svg';
 import { SimbadPointer } from "./SimbadPointer.js";
 import { GridEnabler } from "./GridEnabler.js";
+import { SkewerEnabler } from "./SkewerEnabler";
 import { Stack } from "./Stack.js";
 import { ColorPicker } from "./ColorPicker.js";
 import { ShareActionButton } from "./ShareView.js";
@@ -281,6 +282,22 @@ import { ShareActionButton } from "./ShareView.js";
                         }
                     },
                     {
+                        label: 'Skewer Selection',
+                        mustHide: false,
+                        action: (o) => {
+                            let toolbar = aladin.toolbar;
+                            if (!toolbar.has('skewer')) {
+                                toolbar.add('skewer', new SkewerEnabler(aladin));
+                            } else {
+                                if (toolbar.enabled('skewer')) {
+                                    toolbar.disable('skewer')
+                                } else {
+                                    toolbar.enable('skewer')
+                                }
+                            }
+                        }
+                    },
+                    {
                         label: 'Color picker',
                         mustHide: false,
                         action: (o) => {
@@ -356,7 +373,7 @@ import { ShareActionButton } from "./ShareView.js";
                     },
                     {
                         label: 'General documentation',
-                        
+
                         action(o) {
                             Utils.openNewTab('https://aladin.cds.unistra.fr/AladinLite/doc/')
                         }

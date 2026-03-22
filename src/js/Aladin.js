@@ -74,6 +74,8 @@ import { SimbadPointer } from "./gui/Button/SimbadPointer";
 import { ColorPicker } from "./gui/Button/ColorPicker";
 import { GridEnabler } from "./gui/Button/GridEnabler";
 import { CooFrame } from "./gui/Input/CooFrame";
+import { SkewerEnabler } from "./gui/Button/SkewerEnabler";
+import { SkewerSelector } from "./gui/Button/SkewerSelector";
 import { Circle } from "./shapes/Circle";
 import { Ellipse } from "./shapes/Ellipse";
 import { Polyline } from "./shapes/Polyline";
@@ -110,6 +112,8 @@ import { Polyline } from "./shapes/Polyline";
  * CSS class for that button is `aladin-grid-control`
  * @property {boolean} [showSettingsControl=false] - Whether to show the settings control toolbar.
  * CSS class for that button is `aladin-settings-control`
+ * @property {boolean} [showSkewerControl=false] - Whether to show the skewer selection toggle
+ * CSS class for that button is `aladin-skewerSelector-control`
  * @property {boolean} [showColorPickerControl=false] - Whether to show the color picker tool.
  * CSS class for that button is `aladin-colorPicker-control`
  * @property {boolean} [showShareControl=false] - Whether to show the share control toolbar.
@@ -680,6 +684,12 @@ export let Aladin = (function () {
             widgets["grid"] = grid;
         }
 
+        // Skewer selection control
+        if (options.showSkewerControl) {
+            let skewer = new SkewerSelector(this);
+            widgets["skewer"] = skewer
+        }
+
         // Add the projection control
         // Add the coo grid control
         if (options.showColorPickerControl) {
@@ -786,6 +796,7 @@ export let Aladin = (function () {
         showSimbadPointerControl: false,
         showCooGridControl: false,
         showSettingsControl: false,
+        showSkewerControl: false,
         showColorPickerControl: false,
         // Share toolbar
         showShareControl: false,
@@ -2461,6 +2472,8 @@ export let Aladin = (function () {
             this.view.setMode(View.TOOL_SIMBAD_POINTER);
         } else if (what === "colorpicker") {
             this.view.setMode(View.TOOL_COLOR_PICKER);
+        } else if (what === "skewerselector") {
+            this.view.setMode(View.TOOL_SKEWER_SELECTOR);
         } else if (what === "default") {
             this.view.setMode(View.PAN);
         }
@@ -2515,6 +2528,14 @@ export let Aladin = (function () {
 
     Aladin.prototype.hideCooGrid = function () {
         this.setCooGrid({ enabled: false });
+    };
+
+    Aladin.prototype.setSkewerEnabled = function (enabled) {
+        this.view.setSkewerEnabled(enabled);
+    };
+
+    Aladin.prototype.getSkewerEnabled = function () {
+        return this.view.getSkewerEnabled();
     };
 
     Aladin.prototype.layerByName = function (name) {
