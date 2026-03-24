@@ -76,6 +76,7 @@ import { GridEnabler } from "./gui/Button/GridEnabler";
 import { CooFrame } from "./gui/Input/CooFrame";
 import { SkewerEnabler } from "./gui/Button/SkewerEnabler";
 import { SkewerSelector } from "./gui/Button/SkewerSelector";
+import { SelectionMode } from "./gui/Button/SelectionMode";
 import { Circle } from "./shapes/Circle";
 import { Ellipse } from "./shapes/Ellipse";
 import { Polyline } from "./shapes/Polyline";
@@ -112,8 +113,10 @@ import { Polyline } from "./shapes/Polyline";
  * CSS class for that button is `aladin-grid-control`
  * @property {boolean} [showSettingsControl=false] - Whether to show the settings control toolbar.
  * CSS class for that button is `aladin-settings-control`
- * @property {boolean} [showSkewerControl=false] - Whether to show the skewer selection toggle
+ * @property {boolean} [showSkewerControl=false] - Whether to show the skewer selection toggle.
  * CSS class for that button is `aladin-skewerSelector-control`
+ * @property {boolean} [showSelectionModeControl=false] - Whether to show the selection mode menu.
+ * CSS class for that button is `aladin-selectionMode-control`
  * @property {boolean} [showColorPickerControl=false] - Whether to show the color picker tool.
  * CSS class for that button is `aladin-colorPicker-control`
  * @property {boolean} [showShareControl=false] - Whether to show the share control toolbar.
@@ -688,6 +691,12 @@ export let Aladin = (function () {
         if (options.showSkewerControl) {
             let skewer = new SkewerSelector(this);
             widgets["skewer"] = skewer
+        }
+
+        // Show selection mode control
+        if (options.showSelectionModeControl) {
+            let selectionMode = new SelectionMode(this);
+            widgets["selectionMode"] = selectionMode
         }
 
         // Add the projection control
