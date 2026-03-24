@@ -184,8 +184,8 @@ export class Selector {
         let metaKey = false;
         if (e instanceof Event) {
             xymouse = Utils.relMouseCoords(e);
-            ctrlKey = e.ctrlKey;
-            metaKey = e.metaKey;
+            // ctrlKey = e.ctrlKey;
+            // metaKey = e.metaKey;
             console.log('Skewer click ctrl=' + ctrlKey + ', meta=' + metaKey);
         } else {
             xymouse = e;
@@ -220,9 +220,9 @@ export class Selector {
 
         // If the click is modified with Ctrl or meta (Mac Cmd or PC Windows button)
         // then merge the new selections with the old ones.
-        if (ctrlKey || metaKey) {
-            objList = view.computeModifiedSelection(objList);
-        }
+        // if (ctrlKey || metaKey) {
+        //     objList = view.computeModifiedSelection(objList);
+        // }
 
         return objList;
     }
