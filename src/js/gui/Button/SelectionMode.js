@@ -32,8 +32,8 @@ import helpIconBtn from '../../../../assets/icons/help.svg';
 import { Utils } from "../../Utils";
 import { GridSettingsCtxMenu } from "./../CtxMenu/GridSettings.js";
 import { CtxMenuActionButtonOpener } from "./CtxMenuOpener";
-import skewerSelectionIcon from '../../../../assets/icons/skewer_selection_black.svg';
-import edgeSelectionIcon from '../../../../assets/icons/edge_selection.svg';
+import skewerSelectionIcon from '../../../../assets/icons/skewer_selection-arrow.svg';
+import edgeSelectionIcon from '../../../../assets/icons/edge_selection-arrow.svg';
 import { SimbadPointer } from "./SimbadPointer.js";
 import { GridEnabler } from "./GridEnabler.js";
 import { Stack } from "./Stack.js";
@@ -70,7 +70,7 @@ import { ShareActionButton } from "./ShareView.js";
             classList: ['aladin-selectionMode-control'],
             tooltip: {
                 content: 'Choose the selection mode',
-                position: { direction: 'top right' },
+                position: { direction: 'top' },
             },
             ctxMenu: undefined,
             ...options

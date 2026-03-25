@@ -48,7 +48,7 @@ export class SkewerSelector extends ActionButton {
             size: 'medium',
             tooltip: {
                 content: 'Click inside shapes to select them.<br />Toggle selections with Ctrl or Cmd click.',
-                position: { direction: 'top right' },
+                position: { direction: 'top' },
             },
             action(o) {
                 if (self.mode !== View.TOOL_SKEWER_SELECTOR) {
