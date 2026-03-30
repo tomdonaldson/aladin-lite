@@ -32,13 +32,18 @@ import helpIconBtn from '../../../../assets/icons/help.svg';
 import { Utils } from "../../Utils";
 import { GridSettingsCtxMenu } from "./../CtxMenu/GridSettings.js";
 import { CtxMenuActionButtonOpener } from "./CtxMenuOpener";
-import skewerSelectionIcon from '../../../../assets/icons/skewer_selection-arrow.svg';
-import edgeSelectionIcon from '../../../../assets/icons/edge_selection-arrow.svg';
+import skewerSelectionIconArrow from '../../../../assets/icons/skewer_selection-arrow.svg';
+import skewerSelectionIcon from '../../../../assets/icons/skewer_selection_black.svg';
+import edgeSelectionIconArrow from '../../../../assets/icons/edge_selection-arrow.svg';
+import edgeSelectionIcon from '../../../../assets/icons/edge_selection.svg';
 import { SimbadPointer } from "./SimbadPointer.js";
 import { GridEnabler } from "./GridEnabler.js";
 import { Stack } from "./Stack.js";
 import { ColorPicker } from "./ColorPicker.js";
 import { ShareActionButton } from "./ShareView.js";
+
+
+import addIconUrl from "../../../../assets/icons/plus.svg";
 
 /******************************************************************************
  * Aladin Lite project
@@ -65,7 +70,7 @@ import { ShareActionButton } from "./ShareView.js";
             icon: {
                 size: 'medium',
                 monochrome: true,
-                url: edgeSelectionIcon
+                url: edgeSelectionIconArrow
             },
             classList: ['aladin-selectionMode-control'],
             tooltip: {
@@ -111,14 +116,54 @@ import { ShareActionButton } from "./ShareView.js";
             }});
 
         return [
+            // {
+            //     label: {
+            //         content: [skewerEnableBtn /*, 'Skewer Selection'*/]
+            //     },
+            // },
+            // {
+            //     label: {
+            //         content: [skewerDisableBtn, 'Edge Selection']
+            //     },
+            // },
             {
                 label: {
-                    content: [skewerEnableBtn, 'Skewer Selection']
+                    icon: {
+                        url: skewerSelectionIcon,
+                        monochrome: true,
+                    },
+                    tooltip: {
+                        content: 'Click inside shapes to select them.<br />Toggle selections with Ctrl or Cmd click.',
+                        position: { direction: 'top right' },
+                    },
+                    content: "Skewer Selection",
+                },
+                action: (e) => {
+                    aladin.fire('skewerselector');
+                    console.log('TSD skewer enable clicked!!' + self)
+                    self.setCustomIcon(skewerSelectionIconArrow)
                 },
             },
             {
                 label: {
-                    content: [skewerDisableBtn, 'Edge Selection']
+                    icon: {
+                        url: edgeSelectionIcon,
+                        monochrome: true,
+                        // tooltip: {
+                        //     content: "Add a new layer",
+                        //     position: { direction: "right" },
+                        // },
+                    },
+                    tooltip: {
+                        content: 'Click on objects to select them.<br />Toggle selections with Ctrl or Cmd click.',
+                        position: { direction: 'top right' },
+                    },
+                    content: "Edge Selection",
+                },
+                action: (e) => {
+                    aladin.fire('default');
+                console.log('TSD skewer disable clicked!!' + self)
+                self.setCustomIcon(edgeSelectionIconArrow)
                 },
             },
         ]
