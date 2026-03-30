@@ -48,7 +48,10 @@ export class SkewerSelector extends ActionButton {
             size: 'medium',
             tooltip: {
                 content: 'Click inside shapes to select them.<br />Toggle selections with Ctrl or Cmd click.',
-                position: { direction: 'top' },
+                // TSD tooltip positioning
+                // position: { direction: 'top' },
+                // position: { top: '-80%', bottom: '80%', left: '80%' },
+                position: { top: '-100%', left: '80%' },
             },
             action(o) {
                 if (self.mode !== View.TOOL_SKEWER_SELECTOR) {
@@ -71,7 +74,7 @@ export class SkewerSelector extends ActionButton {
             if (this.aladin.statusBar) {
                 this.aladin.statusBar.appendMessage({
                     id: 'skewerselector',
-                    message: 'Entered Skewer mode, click on skewer icon to exit.',
+                    message: 'Skewer Mode',
                     type: 'info'
                 })
             }

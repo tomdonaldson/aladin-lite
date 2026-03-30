@@ -70,7 +70,10 @@ import { ShareActionButton } from "./ShareView.js";
             classList: ['aladin-selectionMode-control'],
             tooltip: {
                 content: 'Choose the selection mode',
-                position: { direction: 'top' },
+                // TSD tooltip positioning
+                // position: { direction: 'top' },
+                // position: { top: '-60%', bottom: '80%', left: '80%' },
+                position: { top: '-60%', left: '80%' },
             },
             ctxMenu: undefined,
             ...options
