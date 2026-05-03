@@ -281,22 +281,22 @@ import { ShareActionButton } from "./ShareView.js";
                             }
                         }
                     },
-                    {
-                        label: 'Skewer Selection',
-                        mustHide: false,
-                        action: (o) => {
-                            let toolbar = aladin.toolbar;
-                            if (!toolbar.has('skewer')) {
-                                toolbar.add('skewer', new SkewerEnabler(aladin));
-                            } else {
-                                if (toolbar.enabled('skewer')) {
-                                    toolbar.disable('skewer')
-                                } else {
-                                    toolbar.enable('skewer')
-                                }
-                            }
-                        }
-                    },
+                    // {
+                    //     label: 'Skewer Selection',
+                    //     mustHide: false,
+                    //     action: (o) => {
+                    //         let toolbar = aladin.toolbar;
+                    //         if (!toolbar.has('skewer')) {
+                    //             toolbar.add('skewer', new SkewerEnabler(aladin));
+                    //         } else {
+                    //             if (toolbar.enabled('skewer')) {
+                    //                 toolbar.disable('skewer')
+                    //             } else {
+                    //                 toolbar.enable('skewer')
+                    //             }
+                    //         }
+                    //     }
+                    // },
                     {
                         label: 'Color picker',
                         mustHide: false,
