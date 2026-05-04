@@ -66,6 +66,14 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
      * @param {Aladin} aladin - The aladin instance.
      */
     constructor(aladin, options) {
+
+        // If we're on Mac, the modifier key will be Cmd instead of Ctrl.
+        let modifierKey = 'Ctrl';
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf('mac') > -1) {
+            modifierKey = 'Cmd';
+        }
+
         super({
             icon: {
                 size: 'medium',
@@ -74,25 +82,20 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
             },
             classList: ['aladin-selectionMode-control'],
             tooltip: {
-                content: 'Choose the selection mode',
-                // TSD tooltip positioning
-                // position: { direction: 'top' },
-                // position: { top: '-60%', bottom: '80%', left: '80%' },
-                position: { top: '-60%', left: '80%' },
+                content: 'Choose the selection mode<br />(' + modifierKey + ' for multiselect)',
+                position: { direction: 'top right', top: '10%', left: '80%' },
             },
             ctxMenu: undefined,
             ...options
         }, aladin);
 
         this.aladin = aladin;
+        this.modifierKey = modifierKey;
         let ctxMenu = this._buildLayout()
         this.update({ctxMenu})
     }
 
     setCustomIcon(icon) {
-        // if (this?.el?.firstElementChild?.firstElementChild?.src) {
-        //     this.el.firstElementChild.firstElementChild.src  = icon;
-        // }
         this.update({icon: {
                 size: 'medium',
                 monochrome: true,
@@ -133,8 +136,8 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                         monochrome: true,
                     },
                     tooltip: {
-                        content: 'Click inside shapes to select them.<br />Toggle selections with Ctrl or Cmd click.',
-                        position: { direction: 'top right' },
+                        content: 'Click inside shapes to select.<br />Multiselect with ' + self.modifierKey + '.',
+                        position: { direction: 'top right', left: '50%' },
                     },
                     content: "Skewer Selection",
                 },
@@ -149,14 +152,10 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                     icon: {
                         url: edgeSelectionIcon,
                         monochrome: true,
-                        // tooltip: {
-                        //     content: "Add a new layer",
-                        //     position: { direction: "right" },
-                        // },
                     },
                     tooltip: {
-                        content: 'Click on objects to select them.<br />Toggle selections with Ctrl or Cmd click.',
-                        position: { direction: 'top right' },
+                        content: 'Click on objects to select.<br />Multiselect with ' + self.modifierKey + '.',
+                        position: { direction: 'top right', left: '60%' },
                     },
                     content: "Edge Selection",
                 },
