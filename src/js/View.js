@@ -470,7 +470,7 @@ export let View = (function () {
         if (prevMode == View.TOOL_SIMBAD_POINTER) {
             this.catalogCanvas.classList.remove('aladin-sp-cursor');
         } else if (prevMode == View.TOOL_SKEWER_SELECTOR) {
-            this.catalogCanvas.classList.remove('aladin-skewer-cursor');
+            // this.catalogCanvas.classList.remove('aladin-skewer-cursor');
         }
 
         // hide the picker tooltip
@@ -510,8 +510,8 @@ export let View = (function () {
             this.setCursor('crosshair');
             this.aladin.showReticle(false)
         } else if (mode == View.TOOL_SKEWER_SELECTOR) {
-            this.catalogCanvas.style.cursor = '';
-            this.catalogCanvas.classList.add('aladin-skewer-cursor');
+            // this.catalogCanvas.style.cursor = '';
+            // this.catalogCanvas.classList.add('aladin-skewer-cursor');
         }
 
         ALEvent.MODE.dispatchedTo(this.aladin.aladinDiv, {mode});
@@ -760,6 +760,61 @@ export let View = (function () {
             view.selectObjects(objList, modified);
         }
 
+        var hoverObjects = function(objects, xymouse) {
+            var objHoveredFunction = view.aladin.callbacksByEventName['objectHovered'];
+            var footprintHoveredFunction = view.aladin.callbacksByEventName['footprintHovered'];
+
+            view.setCursor('pointer');
+
+            for (let o of objects) {
+
+                if (typeof objHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
+                    var ret = objHoveredFunction(o, xymouse);
+                }
+
+                if (o.isFootprint()) {
+                    if (typeof footprintHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
+                        var ret = footprintHoveredFunction(o, xymouse);
+                    }
+                }
+
+                if (!view.lastHoveredObject || !view.lastHoveredObject.includes(o)) {
+                    o.hover();
+                }
+            }
+
+            // unhover the objects in lastHoveredObjects that are not in closest anymore
+            if (view.lastHoveredObject) {
+                var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
+
+                for (let lho of view.lastHoveredObject) {
+                    if (!objects.includes(lho)) {
+                        lho.unhover();
+
+                        if (typeof objHoveredStopFunction === 'function') {
+                            objHoveredStopFunction(lho, xymouse);
+                        }
+                    }
+                }
+            }
+            view.lastHoveredObject = objects;
+        }
+
+        var unhoverObjects = function(view, xymouse) {
+            view.setCursor('default');
+            if (view.lastHoveredObject) {
+                var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
+                for (let lho of view.lastHoveredObject) {
+                    lho.unhover();
+
+                    if (typeof objHoveredStopFunction === 'function') {
+                        objHoveredStopFunction(lho, xymouse);
+                    }
+                }
+            }
+
+            view.lastHoveredObject = null;
+        }
 
         var touchStartTime;
         Utils.on(view.catalogCanvas, "mousedown touchstart", function (e) {
@@ -1208,65 +1263,20 @@ export let View = (function () {
                     var closests = view.closestObjects(xymouse.x, xymouse.y, 5);
 
                     if (closests) {
-                        var objHoveredFunction = view.aladin.callbacksByEventName['objectHovered'];
-                        var footprintHoveredFunction = view.aladin.callbacksByEventName['footprintHovered'];
-
-                        view.setCursor('pointer');
-
-                        for (let o of closests) {
-
-                            if (typeof objHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
-                                var ret = objHoveredFunction(o, xymouse);
-                            }
-
-                            if (o.isFootprint()) {
-                                if (typeof footprintHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
-                                    var ret = footprintHoveredFunction(o, xymouse);
-                                }
-                            }
-
-                            if (!view.lastHoveredObject || !view.lastHoveredObject.includes(o)) {
-                                o.hover();
-                            }
-                        }
-
-                        // unhover the objects in lastHoveredObjects that are not in closest anymore
-                        if (view.lastHoveredObject) {
-                            var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
-
-                            for (let lho of view.lastHoveredObject) {
-                                if (!closests.includes(lho)) {
-                                    lho.unhover();
-
-                                    if (typeof objHoveredStopFunction === 'function') {
-                                        objHoveredStopFunction(lho, xymouse);
-                                    }
-                                }
-                            }
-                        }
-                        view.lastHoveredObject = closests;
+                        hoverObjects(closests, xymouse);
                     } else {
-                        view.setCursor('default');
-                        if (view.lastHoveredObject) {
-                            var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
-
-                            /*if (typeof objHoveredStopFunction === 'function') {
-                                // call callback function to notify we left the hovered object
-                                var ret = objHoveredStopFunction(view.lastHoveredObject, xymouse);
-                            }
-
-                            view.lastHoveredObject.unhover();*/
-                            for (let lho of view.lastHoveredObject) {
-                                lho.unhover();
-
-                                if (typeof objHoveredStopFunction === 'function') {
-                                    objHoveredStopFunction(lho, xymouse);
-                                }
-                            }
-                        }
-
-                        view.lastHoveredObject = null;
+                        unhoverObjects(view, xymouse);
                     }
+                } else {
+                    // We're in skewer mode.  Let's see what would be selected.
+                    const skewerTargetsByLayer = Selector.getSkewerObjects(e, view);
+                    const skewerObjects = skewerTargetsByLayer.flat();
+                    if (skewerObjects.length > 0) {
+                        hoverObjects(skewerObjects, xymouse);
+                    } else {
+                        unhoverObjects(view, xymouse);
+                    }
+
                 }
 
 
@@ -2541,3 +2551,5 @@ export let View = (function () {
 
     return View;
 })();
+
+
