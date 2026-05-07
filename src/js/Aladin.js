@@ -74,7 +74,6 @@ import { SimbadPointer } from "./gui/Button/SimbadPointer";
 import { ColorPicker } from "./gui/Button/ColorPicker";
 import { GridEnabler } from "./gui/Button/GridEnabler";
 import { CooFrame } from "./gui/Input/CooFrame";
-import { SkewerEnabler } from "./gui/Button/SkewerEnabler";
 import { SkewerSelector } from "./gui/Button/SkewerSelector";
 import { SelectionMode } from "./gui/Button/SelectionMode";
 import { Circle } from "./shapes/Circle";
