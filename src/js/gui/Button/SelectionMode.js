@@ -27,7 +27,6 @@ import { ALEvent } from "../../events/ALEvent.js";
 import { SAMPActionButton } from "../Button/SAMP.js";
 import { SkewerSelectorMenu } from "../Button/SkewerSelectorMenu.js";
 import { SkewerDisableMenu } from "../Button/SkewerDisableMenu.js";
-import { SkewerSelector } from "../Button/SkewerSelector.js";
 import helpIconBtn from '../../../../assets/icons/help.svg';
 import { Utils } from "../../Utils";
 import { GridSettingsCtxMenu } from "./../CtxMenu/GridSettings.js";

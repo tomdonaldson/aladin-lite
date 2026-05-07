@@ -60,36 +60,7 @@ export class SkewerSelectorMenu extends ActionButton {
         self = this;
         self.onClick = options.onClick;
 
-        this.aladin = aladin;
-        this.mode = aladin.view.mode;
-
-        this.addListeners()
-    }
-
-    updateStatus() {
-        if (this.mode === View.TOOL_SKEWER_SELECTOR) {
-            if (this.aladin.statusBar) {
-                this.aladin.statusBar.appendMessage({
-                    id: 'skewerselector',
-                    message: 'Entered Skewer mode, click on skewer icon to exit.',
-                    type: 'info'
-                })
-            }
-        } else {
-            if (this.aladin.statusBar) {
-                this.aladin.statusBar.removeMessage('skewerselector')
-            }
-        }
-
-        this.update({toggled: this.mode === View.TOOL_SKEWER_SELECTOR})
-    }
-
-    addListeners() {
-        // ALEvent.MODE.listenedBy(this.aladin.aladinDiv, e => {
-        //     let mode = e.detail.mode;
-        //     this.mode = mode;
-
-        //     this.updateStatus();
-        // });
+        this.aladin = aladin;  // TSD needed?
+        this.mode = aladin.view.mode;  // TSD needed?
     }
 }
