@@ -13,7 +13,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 export default defineConfig(({mode}) => {
     return {
         build: {
-            minify: false,
+            minify: 'esbuild',
             lib: {
                 // Could also be a dictionary or array of multiple entry points
                 entry: resolve(__dirname, 'src/js/A.js'),
@@ -27,8 +27,7 @@ export default defineConfig(({mode}) => {
             target: ["es2015", "chrome58", "edge18", "firefox57", "node12", "safari11"],
             //target: ["es2015"],
             // Relative to the root
-            // outDir: resolve(__dirname, 'dist'),
-            outDir: '/Users/donald/dev/cobalt/mm26/missions-mast/mast/missions/frontend/node_modules/aladin-lite/dist',
+            outDir: resolve(__dirname, 'dist'),
         },
         //publicDir: resolve(__dirname, 'src/img'),
         plugins: [

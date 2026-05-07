@@ -1924,22 +1924,6 @@ export let View = (function () {
         return this.gridCfg;
     };
 
-    View.prototype.setSkewerEnabled = function (enabled) {
-        const wasEnabled = this.skewerEnabled;
-        this.skewerEnabled = enabled;
-
-        if (enabled && !wasEnabled) {
-            const selectObjects = (selection) => {
-                this.selectObjects(selection);
-            };
-            this.aladin.select('skewer', selectObjects);
-        }
-    };
-
-    View.prototype.getSkewerEnabled = function () {
-        return this.skewerEnabled;
-    };
-
     View.prototype.updateZoomState = function () {
         this.computeNorder();
 

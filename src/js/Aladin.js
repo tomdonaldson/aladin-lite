@@ -794,7 +794,7 @@ export let Aladin = (function () {
         showSimbadPointerControl: false,
         showCooGridControl: false,
         showSettingsControl: false,
-        showSkewerControl: false,
+        showSelectionModeControl: false,
         showColorPickerControl: false,
         // Share toolbar
         showShareControl: false,
@@ -2526,10 +2526,6 @@ export let Aladin = (function () {
 
     Aladin.prototype.hideCooGrid = function () {
         this.setCooGrid({ enabled: false });
-    };
-
-    Aladin.prototype.setSkewerEnabled = function (enabled) {
-        this.view.setSkewerEnabled(enabled);
     };
 
     Aladin.prototype.getSkewerEnabled = function () {

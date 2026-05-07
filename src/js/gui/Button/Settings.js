@@ -356,7 +356,7 @@ import { ShareActionButton } from "./ShareView.js";
                     },
                     {
                         label: 'General documentation',
-
+                        
                         action(o) {
                             Utils.openNewTab('https://aladin.cds.unistra.fr/AladinLite/doc/')
                         }
