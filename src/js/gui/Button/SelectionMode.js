@@ -118,16 +118,6 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
             }});
 
         return [
-            // {
-            //     label: {
-            //         content: [skewerEnableBtn /*, 'Skewer Selection'*/]
-            //     },
-            // },
-            // {
-            //     label: {
-            //         content: [skewerDisableBtn, 'Edge Selection']
-            //     },
-            // },
             {
                 label: {
                     icon: {

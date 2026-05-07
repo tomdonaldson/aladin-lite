@@ -26,7 +26,6 @@ import { CircleSelect } from "./FiniteStateMachine/CircleSelect";
 import { PolySelect } from "./FiniteStateMachine/PolySelect";
 import { LineSelect } from "./FiniteStateMachine/LineSelect";
 import { RectSelect } from "./FiniteStateMachine/RectSelect";
-import { SkewerSelect } from "./FiniteStateMachine/SkewerSelect";
 import { ALEvent } from "./events/ALEvent";
 import { Utils } from './Utils';
 /******************************************************************************
@@ -88,8 +87,6 @@ export class Selector {
             this.select = new PolySelect(options, this.view)
         } else if (mode === 'line') {
             this.select = new LineSelect(options, this.view)
-        } else if (mode === 'skewer') {
-            this.select = new SkewerSelect(options, this.view)
         }
 
         this.dispatch('start', {callback})
