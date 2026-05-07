@@ -107,7 +107,7 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-
+    
     color: white;
     font-size: 11px;
     text-align: center;
@@ -291,7 +291,7 @@
 
 .aladin-anchor-left {
     left: 0;
-
+    
 }
 .aladin-anchor-center{
     left:50%;
@@ -406,7 +406,7 @@
     font-size: 1.0rem;
     font-weight: bold;
     line-height: 0px;
-    padding: 8px 2px;
+    padding: 8px 2px;       
 }
 
 .aladin-closeBtn:hover {
@@ -613,7 +613,7 @@
 
 .aladin-horizontal-list {
     display: flex;
-    align-items: center;
+    align-items: center; 
     list-style: none;
 }
 
@@ -1046,7 +1046,7 @@ otherwise it fits its content options. If those are too big the select can go ou
  .aladin-input-range.aladin-reversed {
      direction: rtl;
  }
-
+ 
  /* Removes default focus */
  .aladin-input-range:focus {
    outline: none;
@@ -1061,9 +1061,9 @@ otherwise it fits its content options. If those are too big the select can go ou
     -webkit-text-fill-color: var(--text-color) !important;
     padding-left: 0.5rem !important;
 }
-
+ 
  /***** Chrome, Safari, Opera and Edge Chromium styles *****/
-
+ 
  .aladin-input-range::-webkit-slider-container {
     height: 0.1rem;
     min-height: 0.1rem;
@@ -1086,8 +1086,8 @@ otherwise it fits its content options. If those are too big the select can go ou
     cursor: default;
     visibility: hidden;
 
-    width: max-content;
-
+    width: max-content; 
+    
     text-align: center;
     padding: 4px;
 
@@ -1095,7 +1095,7 @@ otherwise it fits its content options. If those are too big the select can go ou
     left:0%;
 
     z-index: 100;
-
+ 
     /* Position the tooltip text - see examples below! */
     position: absolute;
     color: var(--text-color);
@@ -1182,17 +1182,7 @@ otherwise it fits its content options. If those are too big the select can go ou
     cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4gEIEwUMBS20MQAAApRJREFUWEfdV7GO2zAMfXY7x1luzOFwDeB/KHCAB87eumvqmI/JWhTwF3TIrMFAv8JbgWyHG3IpOjbpcKJC02KipECHclIU+j2KfKRlAABRUyFYak3UgKiZiXUJAIt1d1ysu2PYn53DsPCucpbkRE3JAdxKTtQgWo6zJAfGGbAwLuEV7OB9/yrXIbqZ9/0+rMuhdb+RYfWmm+fged8fihzyoXXxlNcYB2KRxwwA6SzI9Crgd973B/5/u3IF8FYSw98M5D2QR86kRE3pfX+AMqKm8iEQoqYaWrfj/4bW7QgokMhCeSs5KeVrDM4K29C6Y6oE0YGEUlndocVGyg/rGZDXBQpr0kmjLiAlOOvk3vf7RJZM5Q+te2W/7coVEq+wnC1yCZYyS3B8MMYF3vBKK9Jz5PWmm8sab1eu4N9D63aaHEAsH88SzmQpnSHsHDmnWvlXIoiJ4JTviY8FRUJ8ZAiOEiJbLpcjARM1M0twpmjZOeGQrXYm1/7yMLz/eH8fnyus6XXOtmLgWBrKtdMguNKYPPystIausn9egsVDfI674KxS6003F/sX357AdOBwcADwWD9EjBKJubxYd0cml4RhP5IPrduFk04GjiZXMyZiRHKdAU3OWeB2lLNAk+tpl9IHY0zSlBo4OgsaTJpFzs+F0pxKYEXK73Nd8+3KFfWmG71qGfgSeQqPN0fvdlZrSvmUoXaJJ7EiocArZaS6tgzA+5RQe3gumUl5gPLXzy+6pEQNzDuhvFKx1ZuuEuTxliwmY/KuoHxGhzGv5QDw9PTx7senz88aLHUpJeOu8OHb17u+//4CTMm97/eFVQK5vqR8y6xOyipByjn3+0C3moUH4O++D1UX3PR9eJWzJCf6Tz5O/wDUeIfTLPlbywAAAABJRU5ErkJggg==') 15 15, auto;
 }
 
-/* Skewer selection cursor */
-.aladin-skewer-cursor {
-    cursor: auto;
-    /* cursor: url("data:image/png;base64,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") 0 0, auto; */
-
-    /* cursor: url("data:image/png;base64,") 0 0, auto; */
-
-    cursor: url("data:image/png;base64,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") 0 0, auto;
-}
-
-/**
+/** 
  * Aladin Lite pre-defined UI features.
  *
  * User may need to overwrite those classes if they want
