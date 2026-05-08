@@ -1028,7 +1028,7 @@ export let View = (function () {
             }
 
             // popup to show ?
-            if ((!wasDragging || e.type === "touchend")) {
+            if (!wasDragging || e.type === "touchend") {
                 if (e.type === "touchend") {
                     if (e.targetTouches && e.targetTouches.length == 0) {
                         // Check if the user moved a lot or not
