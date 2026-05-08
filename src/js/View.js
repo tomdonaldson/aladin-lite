@@ -306,6 +306,7 @@ export let View = (function () {
     View.SELECT = 1;
     View.TOOL_SIMBAD_POINTER = 2;
     View.TOOL_COLOR_PICKER = 3;
+    View.TOOL_SKEWER_SELECTOR = 4;
 
     // TODO: should be put as an option at layer level
     View.DRAW_SOURCES_WHILE_DRAGGING = true;
@@ -462,6 +463,13 @@ export let View = (function () {
     }
 
     View.prototype.setMode = function (mode, params) {
+
+        // Undo the specialized cursors, if any.
+        const prevMode = this.mode;
+        if (prevMode == View.TOOL_SIMBAD_POINTER) {
+            this.catalogCanvas.classList.remove('aladin-sp-cursor');
+        }
+
         // hide the picker tooltip
         this.colorPickerTool.domElement.style.display = "none";
         // in case we are in the selection mode
@@ -471,21 +479,21 @@ export let View = (function () {
 
         this.mode = mode;
 
-        if (this.mode == View.TOOL_SIMBAD_POINTER) {
+        if (mode == View.TOOL_SIMBAD_POINTER) {
             this.aladin.popup.hide();
             this.catalogCanvas.style.cursor = '';
             this.catalogCanvas.classList.add('aladin-sp-cursor');
         }
-        else if (this.mode == View.PAN) {
+        else if (mode == View.PAN) {
             this.setCursor('default');
         }
-        else if (this.mode == View.SELECT) {
+        else if (mode == View.SELECT) {
             this.setCursor('crosshair');
             this.aladin.showReticle(false)
 
             const { mode, callback } = params;
             this.selector.start(mode, callback);
-        } else if (this.mode == View.TOOL_COLOR_PICKER) {
+        } else if (mode == View.TOOL_COLOR_PICKER) {
             this.colorPickerTool.domElement.style.display = "block";
             this.setCursor('crosshair');
             this.aladin.showReticle(false)
@@ -670,11 +678,9 @@ export let View = (function () {
         var showContextMenu = true;
         var xystart;
 
-        var handleSelect = function(xy, tolerance) {
+        var handleSelect = function(xy, tolerance, modified=false) {
             tolerance = tolerance || 5;
             var objs = view.closestObjects(xy.x, xy.y, tolerance);
-
-            view.unselectObjects();
 
             if (objs) {
                 var objClickedFunction = view.aladin.callbacksByEventName['objectClicked'];
@@ -714,11 +720,14 @@ export let View = (function () {
                 if (shapes.length > 0) {
                     objs.push(shapes)
                 }
-                view.selectObjects(objs);
+                view.selectObjects(objs, modified);
 
                 view.lastClickedObject = objs;
 
             } else {
+
+                view.unselectObjects();
+
                 // If there is a past clicked object
                 if (view.lastClickedObject) {
                     // TODO: do we need to keep that triggering ?
@@ -729,6 +738,69 @@ export let View = (function () {
                 }
             }
         }
+
+        var handleSkewerSelect = function(e, modified) {
+            // Perform a skewer selection
+            const objList = Selector.getSkewerObjects(e, view);
+            view.selectObjects(objList, modified);
+        }
+
+        var hoverObjects = function(objects, xymouse) {
+            var objHoveredFunction = view.aladin.callbacksByEventName['objectHovered'];
+            var footprintHoveredFunction = view.aladin.callbacksByEventName['footprintHovered'];
+
+            view.setCursor('pointer');
+
+            for (let o of objects) {
+
+                if (typeof objHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
+                    var ret = objHoveredFunction(o, xymouse);
+                }
+
+                if (o.isFootprint()) {
+                    if (typeof footprintHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
+                        var ret = footprintHoveredFunction(o, xymouse);
+                    }
+                }
+
+                if (!view.lastHoveredObject || !view.lastHoveredObject.includes(o)) {
+                    o.hover();
+                }
+            }
+
+            // unhover the objects in lastHoveredObjects that are not in closest anymore
+            if (view.lastHoveredObject) {
+                var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
+
+                for (let lho of view.lastHoveredObject) {
+                    if (!objects.includes(lho)) {
+                        lho.unhover();
+
+                        if (typeof objHoveredStopFunction === 'function') {
+                            objHoveredStopFunction(lho, xymouse);
+                        }
+                    }
+                }
+            }
+            view.lastHoveredObject = objects;
+        }
+
+        var unhoverObjects = function(view, xymouse) {
+            view.setCursor('default');
+            if (view.lastHoveredObject) {
+                var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
+                for (let lho of view.lastHoveredObject) {
+                    lho.unhover();
+
+                    if (typeof objHoveredStopFunction === 'function') {
+                        objHoveredStopFunction(lho, xymouse);
+                    }
+                }
+            }
+
+            view.lastHoveredObject = null;
+        }
+
         var touchStartTime;
         Utils.on(view.catalogCanvas, "mousedown touchstart", function (e) {
             e.stopPropagation();
@@ -811,7 +883,7 @@ export let View = (function () {
 
             view.aladin.contextMenu && view.aladin.contextMenu._hide()
 
-            if (view.mode === View.PAN) {
+            if (view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR) {
                 view.setCursor('move');
             }
 
@@ -854,7 +926,7 @@ export let View = (function () {
             var wasDragging = view.realDragging === true;
 
             if (view.dragging) { // if we were dragging, reset to default cursor
-                if(view.mode === View.PAN) {
+                if(view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR) {
                     view.setCursor('default');
                 }
 
@@ -875,6 +947,7 @@ export let View = (function () {
         // reacting on 'click' rather on 'mouseup' is more reliable when panning the view
         Utils.on(view.catalogCanvas, "mouseup mouseout touchend touchcancel", function (e) {
             const xymouse = Utils.relMouseCoords(e);
+            const modified = e.ctrlKey || e.metaKey;
 
             ALEvent.CANVAS_EVENT.dispatchedTo(view.aladinDiv, {
                 state: {
@@ -963,11 +1036,19 @@ export let View = (function () {
                         const elapsedTime = Date.now() - touchStartTime;
                         if (elapsedTime < 100) {
                             view.updateObjectsLookup();
-                            handleSelect(xymouse, 15);
+                            if (view.mode === View.TOOL_SKEWER_SELECTOR) {
+                                handleSkewerSelect(e, modified)
+                            } else {
+                                handleSelect(xymouse, 15, modified);
+                            }
                         }
                     }
                 } else {
-                    handleSelect(xymouse);
+                    if (view.mode === View.TOOL_SKEWER_SELECTOR) {
+                        handleSkewerSelect(e, modified)
+                    } else {
+                        handleSelect(xymouse, 5, modified);
+                    }
                 }
             }
 
@@ -1135,7 +1216,7 @@ export let View = (function () {
                 view.updateObjectsLookup();
             }
 
-            if (!view.dragging && !view.moving && view.mode === View.PAN) {
+            if (!view.dragging && !view.moving && (view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR)) {
                 // call listener of 'mouseMove' event
                 var onMouseMoveFunction = view.aladin.callbacksByEventName['mouseMove'];
                 if (typeof onMouseMoveFunction === 'function') {
@@ -1150,70 +1231,28 @@ export let View = (function () {
                     lastMouseMovePos = pos;
                 }
 
-                // closestObjects is very costly, we would like to not do it
-                // especially if the objectHovered function is not defined.
-                var closests = view.closestObjects(xymouse.x, xymouse.y, 5);
+                if (view.mode !== View.TOOL_SKEWER_SELECTOR) {
+                    // closestObjects is very costly, we would like to not do it
+                    // especially if the objectHovered function is not defined.
+                    var closests = view.closestObjects(xymouse.x, xymouse.y, 5);
 
-                if (closests) {
-                    var objHoveredFunction = view.aladin.callbacksByEventName['objectHovered'];
-                    var footprintHoveredFunction = view.aladin.callbacksByEventName['footprintHovered'];
-
-                    view.setCursor('pointer');
-
-                    for (let o of closests) {
-
-                        if (typeof objHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
-                            var ret = objHoveredFunction(o, xymouse);
-                        }
-
-                        if (o.isFootprint()) {
-                            if (typeof footprintHoveredFunction === 'function' && (!view.lastHoveredObject || !view.lastHoveredObject.includes(o))) {
-                                var ret = footprintHoveredFunction(o, xymouse);
-                            }
-                        }
-
-                        if (!view.lastHoveredObject || !view.lastHoveredObject.includes(o)) {
-                            o.hover();
-                        }
+                    if (closests) {
+                        hoverObjects(closests, xymouse);
+                    } else {
+                        unhoverObjects(view, xymouse);
                     }
-
-                    // unhover the objects in lastHoveredObjects that are not in closest anymore
-                    if (view.lastHoveredObject) {
-                        var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
-
-                        for (let lho of view.lastHoveredObject) {
-                            if (!closests.includes(lho)) {
-                                lho.unhover();
-
-                                if (typeof objHoveredStopFunction === 'function') {
-                                    objHoveredStopFunction(lho, xymouse);
-                                }
-                            }
-                        }
-                    }
-                    view.lastHoveredObject = closests;
                 } else {
-                    view.setCursor('default');
-                    if (view.lastHoveredObject) {
-                        var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
-
-                        /*if (typeof objHoveredStopFunction === 'function') {
-                            // call callback function to notify we left the hovered object
-                            var ret = objHoveredStopFunction(view.lastHoveredObject, xymouse);
-                        }
-
-                        view.lastHoveredObject.unhover();*/
-                        for (let lho of view.lastHoveredObject) {
-                            lho.unhover();
-
-                            if (typeof objHoveredStopFunction === 'function') {
-                                objHoveredStopFunction(lho, xymouse);
-                            }
-                        }
+                    // We're in skewer mode.  Let's see what would be selected.
+                    const skewerTargetsByLayer = Selector.getSkewerObjects(e, view);
+                    const skewerObjects = skewerTargetsByLayer.flat();
+                    if (skewerObjects.length > 0) {
+                        hoverObjects(skewerObjects, xymouse);
+                    } else {
+                        unhoverObjects(view, xymouse);
                     }
 
-                    view.lastHoveredObject = null;
                 }
+
 
                 if (e.type === "mousemove") {
                     return;
@@ -1234,7 +1273,7 @@ export let View = (function () {
 
             view.realDragging = true;
 
-            if (view.mode === View.PAN) {
+            if (view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR) {
                 view.pan = {
                     s1: view.dragCoo,
                     s2: xymouse
@@ -1348,6 +1387,7 @@ export let View = (function () {
 
         view.displayHpxGrid = false;
         view.displayCatalog = false;
+        view.skewerEnabled = false;
     };
 
     View.prototype.requestRedrawAtDate = function (date) {
@@ -1611,9 +1651,13 @@ export let View = (function () {
         this.requestRedraw();
     }
 
-    View.prototype.selectObjects = function(selection) {
+    View.prototype.selectObjects = function(selection, modified=false) {
         if (this.manualSelection) {
             return;
+        }
+
+        if (Array.isArray(selection) && modified) {
+            selection = this.computeModifiedSelection(selection, selection)
         }
 
         // unselect the previous selection
@@ -1691,6 +1735,104 @@ export let View = (function () {
 
             this.aladin.measurementTable.showMeasurement(tables);
         }
+    }
+
+    View.prototype._getLayerForObj = function(obj) {
+        let layer = null;
+        if (obj.getCatalog) {
+            layer = obj.getCatalog()
+        } else {
+            layer = obj.overlay
+        }
+        return layer
+    }
+
+    View.prototype._copySelectionsToStage = function(selections, stage, overlays, exclude) {
+        for (const group of selections) {
+            for (const obj of group) {
+                const objExcluded = exclude.includes(obj)
+                if (!objExcluded) {
+                    const layer = this._getLayerForObj(obj)
+                    const idx = overlays.findIndex(item => item.uuid === layer.uuid);
+                    // const idx = overlays.indexOf(layer)
+                    if (idx >= 0) {
+                        stage[idx].push(obj)
+                    } else {
+                        console.warn("Layer not found for selected obj: " + obj)
+                    }
+                }
+            }
+        }
+    }
+
+    View.prototype.computeModifiedSelection = function(pending) {
+        const current = this.selection
+        let modSelection = pending
+        if (current && current.length > 0) {
+            // There are some items already selected.
+            // We will be adding all the pending selections that are not already selected,
+            // UNLESS all of the pending selections are already selected, in which case
+            // they will all be unselected.
+            const toAdd = []
+            let mightRemove = []
+            modSelection = []  // We will build a new selection list from the current and pending selections
+
+            // stage will have one row for each existing overlay in which to collect all desired selections.
+            const overlays = this.aladin.getOverlays()
+            const stage = new Array(overlays.length).fill(null).map(() => []);
+
+            // Put already-selected items in mightRemove and not-yet-selected items in toAdd.
+            for (const group of pending) {
+                for (const obj of group) {
+                    if (obj.isSelected) {
+                        mightRemove.push(obj)
+                    } else {
+                        toAdd.push(obj)
+                    }
+                }
+            }
+
+            // If there is anything in toAdd, then clear mightRemove since they will be left selected.
+            if (toAdd.length > 0) {
+                mightRemove = []
+            }
+
+            // Copy current selections to stage except for anything in mightRemove
+            this._copySelectionsToStage(current, stage, overlays, mightRemove)
+
+            // Copy toAdd selections to stage
+            this._copySelectionsToStage([toAdd], stage, overlays, [])
+
+            // Build new modified selections list from stage.
+            // I can preserve the layer order, but I don't know how to preserve the order within
+            // layers without looping through all objects, and that seems crazy.
+            // Hopefully that order doesn't matter.  We'll see if it affects the table display.
+            for (let i=0; i<stage.length; i++) {
+                if (stage[i].length > 0) {
+                    // We have selected objects in this layer so will add the layer (or list of overlays) to modSelection
+
+                    if (overlays[i].type === 'catalog') {
+                        // The layer is a catalog so we add one entry for all its selections
+                        const catLayer = []
+                        modSelection.push(catLayer)
+                        for (const obj of stage[i]) {
+                            catLayer.push(obj)
+                        }
+
+                    } else {
+                        // Assume it's a graphicalOverlay and add separate entries for each selected obj
+                        // (That is the way objects in graphicalOverlays are currently selected.  If they start
+                        // being selected all in one list per overlay, then that can change here.)
+                        for (const obj of stage[i]) {
+                            modSelection.push([obj])
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return modSelection;
     }
 
     View.prototype.getVisibleCells = function (norder) {
@@ -2367,3 +2509,5 @@ export let View = (function () {
 
     return View;
 })();
+
+

@@ -74,6 +74,7 @@ import { SimbadPointer } from "./gui/Button/SimbadPointer";
 import { ColorPicker } from "./gui/Button/ColorPicker";
 import { GridEnabler } from "./gui/Button/GridEnabler";
 import { CooFrame } from "./gui/Input/CooFrame";
+import { SelectionMode } from "./gui/Button/SelectionMode";
 import { Circle } from "./shapes/Circle";
 import { Ellipse } from "./shapes/Ellipse";
 import { Polyline } from "./shapes/Polyline";
@@ -110,6 +111,8 @@ import { Polyline } from "./shapes/Polyline";
  * CSS class for that button is `aladin-grid-control`
  * @property {boolean} [showSettingsControl=false] - Whether to show the settings control toolbar.
  * CSS class for that button is `aladin-settings-control`
+ * @property {boolean} [showSelectionModeControl=false] - Whether to show the selection mode menu.
+ * CSS class for that button is `aladin-selectionMode-control` with menu buttons using  `aladin-skewerSelector-control`
  * @property {boolean} [showColorPickerControl=false] - Whether to show the color picker tool.
  * CSS class for that button is `aladin-colorPicker-control`
  * @property {boolean} [showShareControl=false] - Whether to show the share control toolbar.
@@ -673,15 +676,19 @@ export let Aladin = (function () {
             widgets["simbad"] = simbad
         }
 
-        // Add the projection control
         // Add the coo grid control
         if (options.showCooGridControl) {
             let grid = new GridEnabler(this);
             widgets["grid"] = grid;
         }
 
-        // Add the projection control
-        // Add the coo grid control
+        // Show selection mode control
+        if (options.showSelectionModeControl) {
+            let selectionMode = new SelectionMode(this);
+            widgets["selectionMode"] = selectionMode
+        }
+
+        // Add the color picker control
         if (options.showColorPickerControl) {
             let picker = new ColorPicker(this);
             widgets["picker"] = picker;
@@ -697,6 +704,7 @@ export let Aladin = (function () {
             this.toolbar.add(name, widget);
         }
 
+        // Add the projection control
         if (options.showProjectionControl) {
             this.projBtn = new ProjectionActionButton(this);
             this.addUI(this.projBtn);
@@ -786,6 +794,7 @@ export let Aladin = (function () {
         showSimbadPointerControl: false,
         showCooGridControl: false,
         showSettingsControl: false,
+        showSelectionModeControl: false,
         showColorPickerControl: false,
         // Share toolbar
         showShareControl: false,
@@ -2461,6 +2470,8 @@ export let Aladin = (function () {
             this.view.setMode(View.TOOL_SIMBAD_POINTER);
         } else if (what === "colorpicker") {
             this.view.setMode(View.TOOL_COLOR_PICKER);
+        } else if (what === "skewerselector") {
+            this.view.setMode(View.TOOL_SKEWER_SELECTOR);
         } else if (what === "default") {
             this.view.setMode(View.PAN);
         }
@@ -2515,6 +2526,10 @@ export let Aladin = (function () {
 
     Aladin.prototype.hideCooGrid = function () {
         this.setCooGrid({ enabled: false });
+    };
+
+    Aladin.prototype.getSkewerEnabled = function () {
+        return this.view.getSkewerEnabled();
     };
 
     Aladin.prototype.layerByName = function (name) {

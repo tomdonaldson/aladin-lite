@@ -27,15 +27,16 @@ import { PolySelect } from "./FiniteStateMachine/PolySelect";
 import { LineSelect } from "./FiniteStateMachine/LineSelect";
 import { RectSelect } from "./FiniteStateMachine/RectSelect";
 import { ALEvent } from "./events/ALEvent";
+import { Utils } from './Utils';
 /******************************************************************************
  * Aladin Lite project
- * 
+ *
  * Class Selector
- * 
+ *
  * A selector
- * 
+ *
  * Author: Matthieu Baumann[CDS]
- * 
+ *
  *****************************************************************************/
 
 export class Selector {
@@ -121,7 +122,7 @@ export class Selector {
                     continue;
                 }
                 sources = cat.getSources();
-                
+
                 for (var l = 0; l < sources.length; l++) {
                     s = sources[l];
 
@@ -169,6 +170,45 @@ export class Selector {
                 }
             }
         }
+
+        return objList;
+    }
+
+    static getSkewerObjects(e, view) {
+        // Get the xy from the event
+        let xymouse;
+        if (e instanceof Event) {
+            xymouse = Utils.relMouseCoords(e);
+        } else {
+            xymouse = e;
+        }
+        const x = xymouse.x;
+        const y = xymouse.y;
+
+        // Perform a selection using a circle around x, y as if drawn by dragging 1 px in each direction.
+        const r2 = 2;
+        const r = Math.sqrt(r2);
+
+        let s = {
+            x, y, r,
+            label: 'circle',
+            contains(s) {
+                let dx = (s.x - x)
+                let dy = (s.y - y);
+
+                return dx*dx + dy*dy <= r2;
+            },
+            bbox() {
+                return {
+                    x: x - r,
+                    y: y - r,
+                    w: 2*r,
+                    h: 2*r
+                }
+            }
+        };
+
+        let objList = Selector.getObjects(s, view);
 
         return objList;
     }
