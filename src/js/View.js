@@ -258,7 +258,6 @@ export let View = (function () {
         this.dragging = false;
         this.dragCoo = null;
         this.selectedLayer = undefined;
-        this.skewerMode = false;
 
         this.needRedraw = true;
 
@@ -469,8 +468,6 @@ export let View = (function () {
         const prevMode = this.mode;
         if (prevMode == View.TOOL_SIMBAD_POINTER) {
             this.catalogCanvas.classList.remove('aladin-sp-cursor');
-        } else if (prevMode == View.TOOL_SKEWER_SELECTOR) {
-            // this.catalogCanvas.classList.remove('aladin-skewer-cursor');
         }
 
         // hide the picker tooltip
@@ -479,15 +476,6 @@ export let View = (function () {
         this.requestRedraw();
 
         this.aladin.removeStatusBarMessage('selector')
-
-        // if (mode == View.TOOL_SKEWER_SELECTOR) {
-        //     this.skewerMode = true;
-        //     this.catalogCanvas.style.cursor = '';
-        //     this.catalogCanvas.classList.add('aladin-skewer-cursor');
-        // } else {
-        //     this.skewerMode = false;
-        //     this.mode = mode;
-        // }
 
         this.mode = mode;
 
@@ -509,9 +497,6 @@ export let View = (function () {
             this.colorPickerTool.domElement.style.display = "block";
             this.setCursor('crosshair');
             this.aladin.showReticle(false)
-        } else if (mode == View.TOOL_SKEWER_SELECTOR) {
-            // this.catalogCanvas.style.cursor = '';
-            // this.catalogCanvas.classList.add('aladin-skewer-cursor');
         }
 
         ALEvent.MODE.dispatchedTo(this.aladin.aladinDiv, {mode});
@@ -935,25 +920,14 @@ export let View = (function () {
                     })
                 return; // listeners are not called
             }
-
-            // if (view.mode == View.TOOL_SKEWER_SELECTOR) {
-            //     // Perform a skewer selection
-            //     let objList = Selector.getSkewerObjects(e, view);
-            //     const modified = e.ctrlKey || e.metaKey
-            //     view.selectObjects(objList, modified);
-
-            //     return; // when in TOOL_SKEWER_SELECTOR mode, we do not call the listeners
-            // }
         });
 
         Utils.on(document, "mouseup touchend", function(e) {
             var wasDragging = view.realDragging === true;
 
             if (view.dragging) { // if we were dragging, reset to default cursor
-                if(view.mode === View.PAN) {
+                if(view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR) {
                     view.setCursor('default');
-                } else if (view.mode === View.TOOL_SKEWER_SELECTOR) {
-                    view.setCursor('');
                 }
 
                 view.dragging = false;
