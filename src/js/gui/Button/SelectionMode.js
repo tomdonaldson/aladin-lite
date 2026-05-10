@@ -25,8 +25,6 @@ import { Input } from "../Widgets/Input.js";
 import { Color } from "../../Color.js";
 import { ALEvent } from "../../events/ALEvent.js";
 import { SAMPActionButton } from "../Button/SAMP.js";
-import { SkewerSelectorMenu } from "../Button/SkewerSelectorMenu.js";
-import { SkewerDisableMenu } from "../Button/SkewerDisableMenu.js";
 import helpIconBtn from '../../../../assets/icons/help.svg';
 import { Utils } from "../../Utils";
 import { GridSettingsCtxMenu } from "./../CtxMenu/GridSettings.js";
@@ -121,7 +119,6 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                 },
                 action: (e) => {
                     aladin.fire('skewerselector');
-                    console.log('TSD3 skewer enable clicked!!' + self)
                     self.setCustomIcon(skewerSelectionIconArrow)
                 },
             },
@@ -139,7 +136,6 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                 },
                 action: (e) => {
                     aladin.fire('default');
-                console.log('TSD3 skewer disable clicked!!' + self)
                 self.setCustomIcon(edgeSelectionIconArrow)
                 },
             },
