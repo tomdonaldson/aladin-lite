@@ -106,17 +106,6 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
         let self = this;
         let aladin = this.aladin;
 
-        let skewerEnableBtn = new SkewerSelectorMenu(aladin, {
-            onClick: () => {
-                console.log('TSD skewer enable clicked!!' + self)
-                self.setCustomIcon(skewerSelectionIcon)
-            }});
-        let skewerDisableBtn = new SkewerDisableMenu(aladin, {
-            onClick: () => {
-                console.log('TSD skewer disable clicked!!' + self)
-                self.setCustomIcon(edgeSelectionIcon)
-            }});
-
         return [
             {
                 label: {
@@ -132,7 +121,7 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                 },
                 action: (e) => {
                     aladin.fire('skewerselector');
-                    console.log('TSD skewer enable clicked!!' + self)
+                    console.log('TSD3 skewer enable clicked!!' + self)
                     self.setCustomIcon(skewerSelectionIconArrow)
                 },
             },
@@ -150,7 +139,7 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                 },
                 action: (e) => {
                     aladin.fire('default');
-                console.log('TSD skewer disable clicked!!' + self)
+                console.log('TSD3 skewer disable clicked!!' + self)
                 self.setCustomIcon(edgeSelectionIconArrow)
                 },
             },
