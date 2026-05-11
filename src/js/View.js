@@ -221,6 +221,13 @@ export let View = (function () {
         this.selector = new Selector(this, this.options.selector);
         this.manualSelection = (this.options && this.options.manualSelection) || false;
 
+        // Selection mode
+        this.selectionMode = View.SELECTION_MODE_EDGE;
+        if (this.options.selectionMode === 'skewer') {
+            this.selectionMode = View.SELECTION_MODE_SKEWER;
+        }
+
+
         // current reference image survey displayed
         this.imageLayers = new Map();
 
@@ -306,7 +313,10 @@ export let View = (function () {
     View.SELECT = 1;
     View.TOOL_SIMBAD_POINTER = 2;
     View.TOOL_COLOR_PICKER = 3;
-    View.TOOL_SKEWER_SELECTOR = 4;
+
+    // Selection modes
+    View.SELECTION_MODE_EDGE = 0;
+    View.SELECTION_MODE_SKEWER = 1;
 
     // TODO: should be put as an option at layer level
     View.DRAW_SOURCES_WHILE_DRAGGING = true;
@@ -500,6 +510,14 @@ export let View = (function () {
         }
 
         ALEvent.MODE.dispatchedTo(this.aladin.aladinDiv, {mode});
+    };
+
+    View.prototype.setSelectionMode = function (selectionMode) {
+        this.selectionMode = selectionMode;
+    };
+
+    View.prototype.getSelectionMode = function () {
+        return this.selectionMode;
     };
 
     View.prototype.setCursor = function (cursor) {
@@ -883,7 +901,7 @@ export let View = (function () {
 
             view.aladin.contextMenu && view.aladin.contextMenu._hide()
 
-            if (view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR) {
+            if (view.mode === View.PAN) {
                 view.setCursor('move');
             }
 
@@ -926,7 +944,7 @@ export let View = (function () {
             var wasDragging = view.realDragging === true;
 
             if (view.dragging) { // if we were dragging, reset to default cursor
-                if(view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR) {
+                if(view.mode === View.PAN) {
                     view.setCursor('default');
                 }
 
@@ -1036,7 +1054,7 @@ export let View = (function () {
                         const elapsedTime = Date.now() - touchStartTime;
                         if (elapsedTime < 100) {
                             view.updateObjectsLookup();
-                            if (view.mode === View.TOOL_SKEWER_SELECTOR) {
+                            if (view.selectionMode === View.SELECTION_MODE_SKEWER) {
                                 handleSkewerSelect(e, modified)
                             } else {
                                 handleSelect(xymouse, 15, modified);
@@ -1044,10 +1062,10 @@ export let View = (function () {
                         }
                     }
                 } else {
-                    if (view.mode === View.TOOL_SKEWER_SELECTOR) {
-                        handleSkewerSelect(e, modified)
-                    } else {
+                    if (view.selectionMode === View.SELECTION_MODE_EDGE) {
                         handleSelect(xymouse, 5, modified);
+                    } else {
+                        handleSkewerSelect(e, modified);
                     }
                 }
             }
@@ -1216,7 +1234,7 @@ export let View = (function () {
                 view.updateObjectsLookup();
             }
 
-            if (!view.dragging && !view.moving && (view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR)) {
+            if (!view.dragging && !view.moving && view.mode === View.PAN) {
                 // call listener of 'mouseMove' event
                 var onMouseMoveFunction = view.aladin.callbacksByEventName['mouseMove'];
                 if (typeof onMouseMoveFunction === 'function') {
@@ -1231,7 +1249,8 @@ export let View = (function () {
                     lastMouseMovePos = pos;
                 }
 
-                if (view.mode !== View.TOOL_SKEWER_SELECTOR) {
+                if (view.selectionMode === View.SELECTION_MODE_EDGE) {
+                    // We're in edge selection mode for footprints.  closestObjects() will find those footprints by closeness to a footprint edge.
                     // closestObjects is very costly, we would like to not do it
                     // especially if the objectHovered function is not defined.
                     var closests = view.closestObjects(xymouse.x, xymouse.y, 5);
@@ -1241,10 +1260,11 @@ export let View = (function () {
                     } else {
                         unhoverObjects(view, xymouse);
                     }
-                } else {
+                } else if (view.selectionMode === View.SELECTION_MODE_SKEWER) {
                     // We're in skewer mode.  Let's see what would be selected.
                     const skewerTargetsByLayer = Selector.getSkewerObjects(e, view);
                     const skewerObjects = skewerTargetsByLayer.flat();
+
                     if (skewerObjects.length > 0) {
                         hoverObjects(skewerObjects, xymouse);
                     } else {
@@ -1273,7 +1293,7 @@ export let View = (function () {
 
             view.realDragging = true;
 
-            if (view.mode === View.PAN || view.mode === View.TOOL_SKEWER_SELECTOR) {
+            if (view.mode === View.PAN) {
                 view.pan = {
                     s1: view.dragCoo,
                     s2: xymouse

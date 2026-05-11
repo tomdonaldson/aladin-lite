@@ -38,6 +38,7 @@ import { GridEnabler } from "./GridEnabler.js";
 import { Stack } from "./Stack.js";
 import { ColorPicker } from "./ColorPicker.js";
 import { ShareActionButton } from "./ShareView.js";
+import { View } from "../../View.js";
 
 
 import addIconUrl from "../../../../assets/icons/plus.svg";
@@ -71,11 +72,17 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
             modifierKey = 'Cmd';
         }
 
+        const initialMode = aladin.view.getSelectionMode();
+        let initialIcon = edgeSelectionIconArrow;
+        if (initialMode === View.SELECTION_MODE_SKEWER) {
+            initialIcon = skewerSelectionIconArrow;
+        }
+
         super({
             icon: {
                 size: 'medium',
                 monochrome: true,
-                url: edgeSelectionIconArrow
+                url: initialIcon,
             },
             classList: ['aladin-selectionMode-control'],
             tooltip: {
@@ -118,8 +125,8 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                     content: "Skewer Selection",
                 },
                 action: (e) => {
-                    aladin.fire('skewerselector');
-                    self.setCustomIcon(skewerSelectionIconArrow)
+                    aladin.view.setSelectionMode(View.SELECTION_MODE_SKEWER);
+                    self.setCustomIcon(skewerSelectionIconArrow);
                 },
             },
             {
@@ -135,8 +142,8 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
                     content: "Edge Selection",
                 },
                 action: (e) => {
-                    aladin.fire('default');
-                self.setCustomIcon(edgeSelectionIconArrow)
+                    aladin.view.setSelectionMode(View.SELECTION_MODE_EDGE);
+                    self.setCustomIcon(edgeSelectionIconArrow);
                 },
             },
         ]
