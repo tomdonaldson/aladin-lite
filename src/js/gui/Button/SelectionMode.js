@@ -20,24 +20,11 @@
 //    along with Aladin Lite. If not, see <https://www.gnu.org/licenses/>.
 //
 
-import { Layout } from "../Layout.js";
-import { Input } from "../Widgets/Input.js";
-import { Color } from "../../Color.js";
-import { ALEvent } from "../../events/ALEvent.js";
-import { SAMPActionButton } from "../Button/SAMP.js";
-import helpIconBtn from '../../../../assets/icons/help.svg';
-import { Utils } from "../../Utils";
-import { GridSettingsCtxMenu } from "./../CtxMenu/GridSettings.js";
 import { CtxMenuActionButtonOpener } from "./CtxMenuOpener";
 import skewerSelectionIconArrow from '../../../../assets/icons/skewer_selection-arrow.svg';
 import skewerSelectionIcon from '../../../../assets/icons/skewer_selection_black.svg';
 import edgeSelectionIconArrow from '../../../../assets/icons/edge_selection-arrow.svg';
 import edgeSelectionIcon from '../../../../assets/icons/edge_selection.svg';
-import { SimbadPointer } from "./SimbadPointer.js";
-import { GridEnabler } from "./GridEnabler.js";
-import { Stack } from "./Stack.js";
-import { ColorPicker } from "./ColorPicker.js";
-import { ShareActionButton } from "./ShareView.js";
 import { View } from "../../View.js";
 
 
@@ -48,19 +35,31 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
  *
  * File gui/Button/SelectionMode.js
  *
- * A context menu that shows when the user right clicks, or long touch on touch device
+ * Class representing a button for bringing up a menu for choosing selection mode.
+ * The appearance of the button changes depending on which selection mode (View.getSelectionMode())
+ * is active.
+ * @extends CtxMenuActionButtonOpener
  *
+ * There are two possible selection modes, Edge and Skewer, which affect how footprints are
+ * interactively selected.
+ *
+ * In Edge mode (View.SELECTION_MODE_EDGE), footprints are selected by clicking on their edges.
+ *
+ * In Skewer mode (View.SELECTION_MODE_SKEWER), footprints are selecting by clicking anywhere
+ * inside the footprint.
+ *
+ * Using a modifier key (Cmd on Mac, Ctrl otherwise) during select toggles the potential selections:
+ * - If any of the potential selections are not already selected, those objects are added to the current selections.
+ * - If all of the potential selections are already selected, then they are deselected.
+ *
+ * This uses the CSS class aladin-selectionMode-control.
  *
  * Author: Tom Donaldson (STScI)
  *
  *****************************************************************************/
-/**
- * Class representing a Tabs layout
- * @extends CtxMenuActionButtonOpener
- */
  export class SelectionMode extends CtxMenuActionButtonOpener {
     /**
-     * UI responsible for displaying the viewport infos
+     * Class representing a button for bringing up a menu for choosing selection mode.
      * @param {Aladin} aladin - The aladin instance.
      */
     constructor(aladin, options) {
@@ -72,6 +71,7 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
             modifierKey = 'Cmd';
         }
 
+        // Set the initial button icon based on the current View selection mode.
         const initialMode = aladin.view.getSelectionMode();
         let initialIcon = edgeSelectionIconArrow;
         if (initialMode === View.SELECTION_MODE_SKEWER) {

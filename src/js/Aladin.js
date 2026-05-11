@@ -111,8 +111,8 @@ import { Polyline } from "./shapes/Polyline";
  * CSS class for that button is `aladin-grid-control`
  * @property {boolean} [showSettingsControl=false] - Whether to show the settings control toolbar.
  * CSS class for that button is `aladin-settings-control`
- * @property {boolean} [showSelectionModeControl=false] - Whether to show the selection mode menu to select between 'edge' and 'skewer' selection mode.
- * CSS class for that button is `aladin-selectionMode-control` with menu buttons using  `aladin-skewerSelector-control`
+ * @property {boolean} [showSelectionModeControl=false] - Whether to show the selection mode menu opener button.
+ * CSS class for that button is `aladin-selectionMode-control`
  * @property {boolean} [showColorPickerControl=false] - Whether to show the color picker tool.
  * CSS class for that button is `aladin-colorPicker-control`
  * @property {boolean} [showShareControl=false] - Whether to show the share control toolbar.
