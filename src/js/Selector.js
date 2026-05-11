@@ -176,13 +176,13 @@ export class Selector {
 
     /**
      * Retrieves objects skewered by the cursor position or specified coordinates.  An object is
-     * skewered if it is a shape that contains the specified coordinate, or is a catalog object with 1 pixel
+     * skewered if it is a shape that contains the specified coordinate, or is a catalog object within 3 pixels
      * of the specified coordinate.
      *
      * If e is a mouse event (as opposed to an object with x and y values), the mouse coordinates
      * of the event are used.
      *
-     * This is implemented by simulating the interactive selection of a circle region with a 1 pixel radius)
+     * This is implemented by simulating the interactive selection of a circle region with a 3 pixel radius)
      * around the given coordinates and returns all catalog sources and overlay items intersecting with it.
      *
      * @param {Event|Object} e - Mouse coordinate via mouse event or object with x and y properties
@@ -202,8 +202,8 @@ export class Selector {
         const x = xymouse.x;
         const y = xymouse.y;
 
-        // Perform a selection using a circle around x, y as if drawn by dragging 1 px in each direction.
-        const r2 = 2;
+        // Perform a selection using a circle around x, y as if drawn by dragging 3 pixels.
+        const r2 = 9;
         const r = Math.sqrt(r2);
 
         let selectorObject = {
