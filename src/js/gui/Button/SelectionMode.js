@@ -27,9 +27,6 @@ import edgeSelectionIconArrow from '../../../../assets/icons/edge_selection-arro
 import edgeSelectionIcon from '../../../../assets/icons/edge_selection.svg';
 import { View } from "../../View.js";
 
-
-import addIconUrl from "../../../../assets/icons/plus.svg";
-
 /******************************************************************************
  * Aladin Lite project
  *

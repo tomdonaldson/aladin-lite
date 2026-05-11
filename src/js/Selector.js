@@ -185,7 +185,7 @@ export class Selector {
      * This is implemented by simulating the interactive selection of a circle region with a 1 pixel radius)
      * around the given coordinates and returns all catalog sources and overlay items intersecting with it.
      *
-     * @param {Event|Object} e - Mouse event or coordinates object with numeric x and y properties
+     * @param {Event|Object} e - Mouse coordinate via mouse event or object with x and y properties
      * @param {Object} view - The Aladin View instance containing catalogs and overlays
      * @returns {Array<Array>} Array of object lists, where each subarray contains objects
      *          from a single catalog or overlay that intersect with the selection region.

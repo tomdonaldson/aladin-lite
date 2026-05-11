@@ -757,12 +757,29 @@ export let View = (function () {
             }
         }
 
+        /**
+         * Perform a skewer-based selection of objects at the specified mouse position.
+         *
+         * @param {Event|Object} e - Mouse coordinate via mouse event or object with x and y properties
+         * @param {boolean} withModifierKey - If true, toggles selection (adds/removes from existing selection);
+         *                                    if false, replaces current selection
+         */
         var handleSkewerSelect = function(e, withModifierKey) {
-            // Perform a skewer selection
+
             const objList = Selector.getSkewerObjects(e, view);
             view.selectObjects(objList, withModifierKey);
         }
 
+        /**
+         * Make the selected objects appear hovered and make all other objects appear unhovered,
+         * firing the appropriate callbacks for both cases.
+         *
+         * The also sets the cursor to a pointer to indicate that some object(s) would be
+         * select on click in the current mouse position.
+         *
+         * @param {Array} objects - Array of objects to apply hover state to
+         * @param {Object} xymouse - Mouse coordinates with x and y properties
+         */
         var hoverObjects = function(objects, xymouse) {
             var objHoveredFunction = view.aladin.callbacksByEventName['objectHovered'];
             var footprintHoveredFunction = view.aladin.callbacksByEventName['footprintHovered'];
@@ -803,7 +820,16 @@ export let View = (function () {
             view.lastHoveredObject = objects;
         }
 
-        var unhoverObjects = function(view, xymouse) {
+        /**
+         * Removes hover state from all previously hovered objects and fires the
+         * apropriate callbacks.
+         *
+         * The also resets the cursor to the default to indicate that no objects would be
+         * selected on click in the current mouse position.
+         *
+         * @param {Object} xymouse - Mouse coordinates with x and y properties
+         */
+        var unhoverObjects = function(xymouse) {
             view.setCursor('default');
             if (view.lastHoveredObject) {
                 var objHoveredStopFunction = view.aladin.callbacksByEventName['objectHoveredStop'];
@@ -1653,6 +1679,9 @@ export let View = (function () {
         return imageData;
     };
 
+    /**
+     * Unselects all currently selected objects.
+     */
     View.prototype.unselectObjects = function() {
         if (this.manualSelection) {
             return;
@@ -1671,13 +1700,22 @@ export let View = (function () {
         this.requestRedraw();
     }
 
+    /**
+     * Selects the specified objects in the view.
+     *
+     * If withModifierKey is true, it modifies the existing selection (adds/removes).
+     * Otherwise, it replaces the current selection.
+     *
+     * @param {Array|Object} selection - The objects to select, either an array or a selector object.
+     * @param {boolean} [withModifierKey=false] - Whether to modify (versus replace) the existing selections.
+     */
     View.prototype.selectObjects = function(selection, withModifierKey=false) {
         if (this.manualSelection) {
             return;
         }
 
         if (Array.isArray(selection) && withModifierKey) {
-            selection = this.computeModifiedSelection(selection, selection)
+            selection = this.computeModifiedSelection(selection)
         }
 
         // unselect the previous selection
@@ -1774,7 +1812,6 @@ export let View = (function () {
                 if (!objExcluded) {
                     const layer = this._getLayerForObj(obj)
                     const idx = overlays.findIndex(item => item.uuid === layer.uuid);
-                    // const idx = overlays.indexOf(layer)
                     if (idx >= 0) {
                         stage[idx].push(obj)
                     } else {
@@ -1785,6 +1822,18 @@ export let View = (function () {
         }
     }
 
+    /**
+     * Computes the full set of selections that should result if the specified (pending) objects were
+     * selected with a modifier key pressed.
+     *
+     * If there are existing selections, it adds pending items that aren't selected,
+     * or removes all pending items if they are all already selected.
+     *
+     * Organizes selections by overlay layers as expected by selectObjects.
+     *
+     * @param {Array<Array>} pending - Array of array of objects to potentially add/remove from selection.
+     * @returns {Array<Array>} The modified selection array.
+     */
     View.prototype.computeModifiedSelection = function(pending) {
         const current = this.selection
         let modSelection = pending
@@ -1825,8 +1874,7 @@ export let View = (function () {
 
             // Build new modified selections list from stage.
             // I can preserve the layer order, but I don't know how to preserve the order within
-            // layers without looping through all objects, and that seems crazy.
-            // Hopefully that order doesn't matter.  We'll see if it affects the table display.
+            // layers without looping through all objects.  Hopefully that order doesn't matter.
             for (let i=0; i<stage.length; i++) {
                 if (stage[i].length > 0) {
                     // We have selected objects in this layer so will add the layer (or list of overlays) to modSelection
@@ -1851,7 +1899,6 @@ export let View = (function () {
             }
 
         }
-
         return modSelection;
     }
 
