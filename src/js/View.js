@@ -489,21 +489,21 @@ export let View = (function () {
 
         this.mode = mode;
 
-        if (mode == View.TOOL_SIMBAD_POINTER) {
+        if (this.mode == View.TOOL_SIMBAD_POINTER) {
             this.aladin.popup.hide();
             this.catalogCanvas.style.cursor = '';
             this.catalogCanvas.classList.add('aladin-sp-cursor');
         }
-        else if (mode == View.PAN) {
+        else if (this.mode == View.PAN) {
             this.setCursor('default');
         }
-        else if (mode == View.SELECT) {
+        else if (this.mode == View.SELECT) {
             this.setCursor('crosshair');
             this.aladin.showReticle(false)
 
             const { mode, callback } = params;
             this.selector.start(mode, callback);
-        } else if (mode == View.TOOL_COLOR_PICKER) {
+        } else if (this.mode == View.TOOL_COLOR_PICKER) {
             this.colorPickerTool.domElement.style.display = "block";
             this.setCursor('crosshair');
             this.aladin.showReticle(false)
@@ -696,7 +696,7 @@ export let View = (function () {
         var showContextMenu = true;
         var xystart;
 
-        var handleSelect = function(xy, tolerance, modified=false) {
+        var handleSelect = function(xy, tolerance, withModifierKey=false) {
             tolerance = tolerance || 5;
             var objs = view.closestObjects(xy.x, xy.y, tolerance);
 
@@ -738,7 +738,7 @@ export let View = (function () {
                 if (shapes.length > 0) {
                     objs.push(shapes)
                 }
-                view.selectObjects(objs, modified);
+                view.selectObjects(objs, withModifierKey);
 
                 view.lastClickedObject = objs;
 
@@ -757,10 +757,10 @@ export let View = (function () {
             }
         }
 
-        var handleSkewerSelect = function(e, modified) {
+        var handleSkewerSelect = function(e, withModifierKey) {
             // Perform a skewer selection
             const objList = Selector.getSkewerObjects(e, view);
-            view.selectObjects(objList, modified);
+            view.selectObjects(objList, withModifierKey);
         }
 
         var hoverObjects = function(objects, xymouse) {
@@ -965,7 +965,7 @@ export let View = (function () {
         // reacting on 'click' rather on 'mouseup' is more reliable when panning the view
         Utils.on(view.catalogCanvas, "mouseup mouseout touchend touchcancel", function (e) {
             const xymouse = Utils.relMouseCoords(e);
-            const modified = e.ctrlKey || e.metaKey;
+            const withModifierKey = e.ctrlKey || e.metaKey;
 
             ALEvent.CANVAS_EVENT.dispatchedTo(view.aladinDiv, {
                 state: {
@@ -1055,17 +1055,17 @@ export let View = (function () {
                         if (elapsedTime < 100) {
                             view.updateObjectsLookup();
                             if (view.selectionMode === View.SELECTION_MODE_SKEWER) {
-                                handleSkewerSelect(e, modified)
+                                handleSkewerSelect(e, withModifierKey)
                             } else {
-                                handleSelect(xymouse, 15, modified);
+                                handleSelect(xymouse, 15, withModifierKey);
                             }
                         }
                     }
                 } else {
                     if (view.selectionMode === View.SELECTION_MODE_EDGE) {
-                        handleSelect(xymouse, 5, modified);
+                        handleSelect(xymouse, 5, withModifierKey);
                     } else {
-                        handleSkewerSelect(e, modified);
+                        handleSkewerSelect(e, withModifierKey);
                     }
                 }
             }
@@ -1671,12 +1671,12 @@ export let View = (function () {
         this.requestRedraw();
     }
 
-    View.prototype.selectObjects = function(selection, modified=false) {
+    View.prototype.selectObjects = function(selection, withModifierKey=false) {
         if (this.manualSelection) {
             return;
         }
 
-        if (Array.isArray(selection) && modified) {
+        if (Array.isArray(selection) && withModifierKey) {
             selection = this.computeModifiedSelection(selection, selection)
         }
 

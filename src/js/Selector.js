@@ -174,6 +174,23 @@ export class Selector {
         return objList;
     }
 
+    /**
+     * Retrieves objects skewered by the cursor position or specified coordinates.  An object is
+     * skewered if it is a shape that contains the specified coordinate, or is a catalog object with 1 pixel
+     * of the specified coordinate.
+     *
+     * If e is a mouse event (as opposed to an object with x and y values), the mouse coordinates
+     * of the event are used.
+     *
+     * This is implemented by simulating the interactive selection of a circle region with a 1 pixel radius)
+     * around the given coordinates and returns all catalog sources and overlay items intersecting with it.
+     *
+     * @param {Event|Object} e - Mouse event or coordinates object with numeric x and y properties
+     * @param {Object} view - The Aladin View instance containing catalogs and overlays
+     * @returns {Array<Array>} Array of object lists, where each subarray contains objects
+     *          from a single catalog or overlay that intersect with the selection region.
+     *          Returns empty array if no objects are found.
+     */
     static getSkewerObjects(e, view) {
         // Get the xy from the event
         let xymouse;
@@ -189,7 +206,7 @@ export class Selector {
         const r2 = 2;
         const r = Math.sqrt(r2);
 
-        let s = {
+        let selectorObject = {
             x, y, r,
             label: 'circle',
             contains(s) {
@@ -208,7 +225,7 @@ export class Selector {
             }
         };
 
-        let objList = Selector.getObjects(s, view);
+        let objList = Selector.getObjects(selectorObject, view);
 
         return objList;
     }

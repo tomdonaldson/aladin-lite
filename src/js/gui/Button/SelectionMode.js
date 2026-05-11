@@ -38,7 +38,6 @@ import addIconUrl from "../../../../assets/icons/plus.svg";
  * Class representing a button for bringing up a menu for choosing selection mode.
  * The appearance of the button changes depending on which selection mode (View.getSelectionMode())
  * is active.
- * @extends CtxMenuActionButtonOpener
  *
  * There are two possible selection modes, Edge and Skewer, which affect how footprints are
  * interactively selected.

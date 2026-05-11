@@ -2527,10 +2527,6 @@ export let Aladin = (function () {
         this.setCooGrid({ enabled: false });
     };
 
-    Aladin.prototype.getSkewerEnabled = function () {
-        return this.view.getSkewerEnabled();
-    };
-
     Aladin.prototype.layerByName = function (name) {
         var c = this.view.allOverlayLayers;
         for (var k = 0; k < c.length; k++) {
