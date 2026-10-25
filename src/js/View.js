@@ -1352,7 +1352,7 @@ export let View = (function () {
                         unhoverObjects(view, xymouse);
                     }
 
-                    this.drawAllOverlays();
+                    view.drawAllOverlays();
                 }
 
                 if (e.type === "mousemove") {
