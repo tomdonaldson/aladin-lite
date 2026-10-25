@@ -578,7 +578,7 @@ export let View = (function () {
 
     View.prototype.getRawPixelsCanvas = function(width, height) {
         // important: redraw must be called just before getting the pixels
-        // because the drawing buffer is not preserved (preserveDrawingBuffer = false) 
+        // because the drawing buffer is not preserved (preserveDrawingBuffer = false)
         this.redraw()
 
         const canvas = this.wasm.canvas();
@@ -719,7 +719,7 @@ export let View = (function () {
                         );
                         ctxMenu._show({e});
                     }
-                }   
+                }
             }
         });
 
@@ -1351,7 +1351,7 @@ export let View = (function () {
                         unhoverObjects(view, xymouse);
                     }
 
-                    this.drawAllOverlays();
+                    view.drawAllOverlays();
                 }
 
                 if (e.type === "mousemove") {
