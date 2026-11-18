@@ -69,7 +69,7 @@ export class ContextMenu extends DOMElement {
                     })
                 }
             } else {
-                new ResizeObserver(() => { 
+                new ResizeObserver(() => {
                     this._hide()
                 })
                 .observe(this.aladin.aladinDiv)
@@ -120,7 +120,7 @@ export class ContextMenu extends DOMElement {
             if (opt.label instanceof DOMElement) {
                 // And add it to the DOM
                 opt.label.attachTo(item);
-            } else if (opt.label instanceof Element) {                
+            } else if (opt.label instanceof Element) {
                 item.insertAdjacentElement('beforeend', opt.label);
             } else if (opt.label instanceof Object) {
                 let layout = [];
@@ -213,14 +213,14 @@ export class ContextMenu extends DOMElement {
                 if (Utils.hasTouchScreen()) {
                     let subMenu = item.querySelector(".aladin-context-sub-menu")
                     let subMenuIsShown = subMenu.style.display === "block";
-    
+
                     if (item.parentNode) {
                         let subMenus = item.parentNode.querySelectorAll(".aladin-context-sub-menu")
                         for (let subMenuChild of subMenus) {
                             subMenuChild.style.display = 'none';
                         }
                     }
-    
+
                     if (!subMenuIsShown) {
                         subMenu.style.setProperty('display', 'block');
                     }
@@ -292,7 +292,7 @@ export class ContextMenu extends DOMElement {
     _subMenuDisplay(parent, child) {
         parent.style.display = "block";
         child.style.display = "block";
-    
+
         if (child.classList.contains('aladin-context-sub-menu')) {
             const aladinRect = this.aladin.aladinDiv.getBoundingClientRect();
 
@@ -340,7 +340,15 @@ export class ContextMenu extends DOMElement {
             this.setCss(options.cssStyle);
         }
 
-        let mouseCoords = options && options.e && {x: options.e.x, y: options.e.y};
+        // let mouseCoords = options && options.e && {x: options.e.x, y: options.e.y};  // TSD old behavior
+
+        let mouseCoords;
+        if (options && options.e) {
+            // e.x/e.y are viewport coords; the menu is absolutely positioned inside aladinDiv
+            const aladinRect = this.aladin.aladinDiv.getBoundingClientRect();
+            mouseCoords = {x: options.e.x - aladinRect.left, y: options.e.y - aladinRect.top};
+        }
+
         // Set position
         const position =
         options && options.position ||
@@ -382,15 +390,15 @@ export class ContextMenu extends DOMElement {
                 fileLoader.type = 'file';
                 fileLoader.accept = itemOptions.accept || '*';
                 // Case: The user is loading a FITS file
-        
-                fileLoader.addEventListener("change", (e) => {    
+
+                fileLoader.addEventListener("change", (e) => {
                     let file = e.target.files[0];
-        
+
                     if (itemOptions.action) {
                         itemOptions.action(file)
                     }
                 });
-        
+
                 fileLoader.click();
             }
         }
@@ -417,12 +425,12 @@ export class ContextMenu extends DOMElement {
                 webkitDirLoader.multiple = true;
 
                 // Case: The user is loading a FITS file
-                webkitDirLoader.addEventListener("change", (e) => {    
+                webkitDirLoader.addEventListener("change", (e) => {
                     if (itemOptions.action) {
                         itemOptions.action(e.target.files)
                     }
                 });
-        
+
                 webkitDirLoader.click();
             }
         }

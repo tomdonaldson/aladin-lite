@@ -578,7 +578,7 @@ export let View = (function () {
 
     View.prototype.getRawPixelsCanvas = function(width, height) {
         // important: redraw must be called just before getting the pixels
-        // because the drawing buffer is not preserved (preserveDrawingBuffer = false) 
+        // because the drawing buffer is not preserved (preserveDrawingBuffer = false)
         this.redraw()
 
         const canvas = this.wasm.canvas();
@@ -719,7 +719,7 @@ export let View = (function () {
                         );
                         ctxMenu._show({e});
                     }
-                }   
+                }
             }
         });
 
@@ -1351,7 +1351,7 @@ export let View = (function () {
                         unhoverObjects(view, xymouse);
                     }
 
-                    this.drawAllOverlays();
+                    view.drawAllOverlays();
                 }
 
                 if (e.type === "mousemove") {
@@ -2509,7 +2509,17 @@ export let View = (function () {
 
             this.catalogs.splice(indexToDelete, 1);
 
-            this.unselectObjects();
+            // Remove selections for only the overlay we're removing.
+            const all_selections = [];
+            if (this.selection) {
+                for (const layer_selections of this.selection) {
+                    // Preserve the existing selections that aren't in this catalog layer.
+                    if (layer_selections[0].catalog !== overlay) {
+                        all_selections.push(layer_selections);
+                    }
+                }
+            }
+            this.selectObjects(all_selections);
         }
         else if (overlay.type == 'moc') {
             indexToDelete = this.mocs.indexOf(overlay);
